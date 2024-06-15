@@ -3,13 +3,18 @@
 open AST
 open Utils
 
+open FParsec
+
+open System
+open System.IO
+
 let rec private _std_plus_impl lst = 
     match lst with
     | [] -> None()
     | [s] -> s
     | [Int(x); Int(y)] -> Int(x + y)
     | [Float(x); Float(y)] -> Float(x + y)
-    | [String(x); String(y)] -> String(x + y)
+    | [String(x); String(y)] -> AST.String(x + y)
     | [None(); _] -> None()
     | [_; None()] -> None()
     | _ -> List.reduce (fun x y -> _std_plus_impl [x;y]) lst
@@ -187,6 +192,38 @@ let private _std_match_type =
         _std_match_type_impl
     )
 
+let private _std_read_line_impl lst = 
+    AST.String(Console.ReadLine())
+
+let private _std_read_line = 
+    InternalFunction(
+        _std_read_line_impl
+    )
+
+let private _std_to_int_impl lst =
+    match lst with
+    | [String(x)] -> try Int(int(x)) with | _ -> failwith (sprintf "Failed to convert %s to int" x)
+    | [Int(x)] as [s] -> s
+    | [Float(x)] -> try Int(int(x)) with | _ -> failwith (sprintf "Failed to convert %A to int" x)
+    | [Bool(true)] -> Int(1)
+    | [Bool(false)] -> Int(0)
+    | _ -> None()
+
+let private _std_to_int =
+    InternalFunction(
+        _std_to_int_impl
+    )
+
+let private _std_parse_value_impl lst =
+    match lst with
+    | [String(x)] -> parseValue x
+    | _ -> None()
+
+let private _std_parse_value =
+    InternalFunction(
+        _std_parse_value_impl
+    )
+
 // Final
 
 let STD_MODULE = Module(
@@ -205,8 +242,11 @@ let STD_MODULE = Module(
         "&&", _std_and;
         "!", _std_not;
 
-        "match_type", _std_match_type
-        "print", _std_print;
+        "std.match_type", _std_match_type;
+        "std.print", _std_print;
+        "std.read_line", _std_read_line;
+        "std.to_int", _std_to_int;
+        "std.parse", _std_parse_value;
 
         ">>", _std_composition;
         "id", _std_id;

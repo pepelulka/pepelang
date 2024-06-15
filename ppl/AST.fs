@@ -31,8 +31,8 @@ type Expression =
     | DefineConstraint of string*Expression
     | Fail of Expression
 
-    | LetIn of string*Expression*Expression // NOT IMPLEMENTED ===================================
-    | Do of Expression list // NOT IMPLEMENTED ===================================================
+    | LetIn of Expression*Expression
+    | Do of Expression list
 
     | Import of string
 
@@ -69,7 +69,7 @@ let rec TypeOf exp =
     | Float(_) -> BaseType("float")
     | None() -> BaseType("none")
     | Literal(_) -> BaseType("literal")
-    // Same cases
+
     | Closure(_) -> BaseType("lambda")
     | Lambda(_) -> BaseType("lambda")
 

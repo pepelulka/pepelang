@@ -1,0 +1,11 @@
+let fact n = if {= n 0} then 1 else {* n {fact {- n 1} } };
+
+{std.print "Enter n:"};
+let s = {std.read_line};
+
+let n = {std.parse s};
+
+if {std.match_type n int} then
+    {std.print {fact n} %nl}
+else
+    {std.print "Incorrect input" %nl };

@@ -85,6 +85,13 @@ let rec Evaluate expr env =
                             lambdas,
                             Map.add name (Lambda(h, lambdas)) (Dynamic env) ) // Here are we creating recursive reference by adding its name
                         )
+    | LetIn(l, exp) ->
+        let el = Evaluate l env in
+        match el with
+        | LetResult(x, y) -> Evaluate exp (Set x y env)
+        | _ -> failwith "Impossible"
+    | Do(lst) ->
+        List.fold (fun x y -> Evaluate y env) (None()) lst
     | Apply(exp, lst) -> apply (Evaluate exp env) (evalList lst env) env
     | Lambda(name, exp) -> Closure(name, exp, (Dynamic env))
     | Closure(_) as c -> c
@@ -123,8 +130,11 @@ and applyOne expToApply arg env =
     | _ -> failwith (sprintf "You can't apply %A to %A" exp arg)
 
 and apply exp lst env =
-    if List.length lst = 0 then exp
-        else
+    let isInternal x =
+        match x with
+        | InternalFunction(_) -> true
+        | _ -> false
+    if (List.length lst) = 0 && not (isInternal exp) then exp else
     match exp with
     | InternalFunction(f) -> f lst
     | Closure(_) as c -> 

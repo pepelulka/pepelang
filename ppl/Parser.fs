@@ -14,7 +14,7 @@ let test p str =
 
 let parser, parserRef = createParserForwardedToRef<Expression, unit>()
 
-let private ws = spaces
+let private ws = spaces <|> eof
 
 let private identifier : Parser<_> =
     let isIdentifierFirstChar c = isLetter c || c = '_'
@@ -43,7 +43,9 @@ let private pFloat : Parser<_> =
 let private pString : Parser<_> = stringLiteral .>> ws |>> String
 let private pVar : Parser<_> = identifier .>> ws |>> Var
 let private pLet : Parser<_> = 
-    pipe3 (pstring "let" >>. ws >>. identifier .>> ws) (many (identifier .>> ws)) (pstring "=" >>. ws >>. parser) pack3 |>> Let 
+    pipe3 (pstring "let" >>. ws >>. identifier .>> ws) (many (identifier .>> ws)) (pstring "=" >>. ws >>. parser) pack3 |>> Let
+let private pLetIn : Parser<_> =
+    pipe2 (pLet .>> ws .>> pstring "in" .>> ws) (parser .>> ws) pack2 |>> LetIn
 let private pBool : Parser<_> = ((pstring "true" .>> ws) >>% Bool(true)) <|> 
                                 ((pstring "false" .>> ws) >>% Bool(false))
 let private pNone : Parser<_> = (pstring "None" .>> ws) >>% None()
@@ -64,9 +66,12 @@ let private pLambda : Parser<_> = pipe2
 let private pLiteral : Parser<_> = (pstring "%" >>. identifier .>> ws) |>> Literal
 let private pImport : Parser<_> = (pstring "import" >>. ws >>. identifier .>> ws) |>> Import
 let private pTuple : Parser<_> = between (pstring "(" >>. ws) (pstring ")" >>. ws) (sepBy (parser .>> ws) (pstring "," .>> ws)) |>> Tuple
-let private pLazy : Parser<_> = (pstring "lazy" >>. ws >>. parser .>> ws) |>> Lazy
+let private pLazy : Parser<_> = (pstring "Lazy" >>. ws >>. parser .>> ws) |>> Lazy
 let private pForce : Parser<_> = (pstring "force" >>. ws >>. parser .>> ws) |>> Force
 let private pFail : Parser<_> = (pstring "fail" >>. ws >>. parser .>> ws) |>> Fail
+let private pDo : Parser<_> = (pstring "do" >>. ws >>.
+                                  between (pstring "[" .>> ws) (pstring "]" .>> ws) (many1 (parser .>> ws .>> pstring ";" .>> ws))   
+                              ) |>> Do
 
 // TypeConstraints:
 let pConstraint, pConstraintRef = createParserForwardedToRef<Expression, unit>()
@@ -112,6 +117,8 @@ do parserRef := ws >>. choice [
     pLambda
     pLiteral
     pTuple
+    attempt pDo
+    attempt pLetIn
     attempt pLetOperator
     attempt pLet
     attempt pBool

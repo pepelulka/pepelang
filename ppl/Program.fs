@@ -5,9 +5,6 @@ open FParsec
 open System
 open System.IO
 
-let str = "
-"
-
 let StdModulesSet = Map [
     "math", Math.MathModule
 ]
@@ -23,8 +20,8 @@ let fileContent =
     | Option.None -> failwith "There's no source file given"; Option.None
     | Some(x) -> Some(File.ReadAllText x)
 
-match (run FinalParser str) with
-    | Failure(x, _, _) -> printfn "%s" x
-    | Success(x, _, _) -> (Interpreter.RunProgram x StdModulesSet ) |> ignore
-
-// Apply construction
+match fileContent with
+    | Option.None -> failwith "Failed to read file"
+    | Some(x) -> match (run FinalParser x) with
+                    | Failure(x, _, _) -> printfn "%s" x
+                    | Success(x, _, _) -> (Interpreter.RunProgram x StdModulesSet ) |> ignore
