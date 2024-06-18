@@ -1,0 +1,22 @@
+type BST = (_, _, _);
+
+let bst.Add el bst =
+    match bst with
+    | n of none -> (None, el, None)
+    | (lc, rt, rc) -> 
+        if {> el rt} then (lc, rt, {bst.Add el rc})
+        else ({bst.Add el lc}, rt, rc)
+    | _ -> fail "bst.Add: expected bst" $;
+
+let bst.InOrder f bst =
+    match bst with
+    | n of none -> None
+    | (lc, rt, rc) ->
+        do [
+            {bst.InOrder f lc};
+            {f rt};
+            {bst.InOrder f rc};  
+        ]
+    | _ -> fail "bst.Add: expected bst" $;
+
+let bst.Empty = None;

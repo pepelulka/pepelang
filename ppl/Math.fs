@@ -1,4 +1,10 @@
-﻿module Math
+﻿(*
+
+Standard math library.
+
+*)
+
+module Math
 
 open AST
 
@@ -12,6 +18,11 @@ let private _math_unary_float_func_impl func lst =
 let private _math_sqrt =
     InternalFunction(
         _math_unary_float_func_impl sqrt
+    )
+
+let private _math_abs =
+    InternalFunction(
+        _math_unary_float_func_impl abs
     )
 
 let private _math_sin =
@@ -33,8 +44,9 @@ let private _math_tan =
 // Final:
 
 let MathModule = Module [
-    "sqrt", _math_sqrt;
-    "sin", _math_sin;
-    "cos", _math_cos;
-    "tan", _math_tan;
+    "math.sqrt", _math_sqrt;
+    "math.abs", _math_abs;
+    "math.sin", _math_sin;
+    "math.cos", _math_cos;
+    "math.tan", _math_tan;
 ]

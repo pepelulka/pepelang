@@ -1,7 +1,0 @@
-let print2 s = Lazy
-    do [
-        {std.print s " "};
-        {std.print s %nl};
-    ];
-
-force {print2 "meow"};

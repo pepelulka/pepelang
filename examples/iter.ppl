@@ -1,0 +1,13 @@
+let iter.for f a b =
+    if {<= b a} then None else
+    do [{f a}; {for f {+ a 1} b};];
+
+let iter.iter acc f a b =
+    if {<= b a} then acc else
+    let newAcc = {f acc a} in
+    {iter.iter newAcc f {+ a 1} b};
+
+let iter.iterStep acc f a b step =
+    if {<= b a} then acc else
+    let newAcc = {f acc a} in
+    {iter.iter newAcc f {+ a step} b};

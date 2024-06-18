@@ -10,8 +10,8 @@
     <Compile Include="Utils.fs" />
     <Compile Include="StdModule.fs" />
     <Compile Include="Math.fs" />
-    <Compile Include="Interpreter.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="Interpreter.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

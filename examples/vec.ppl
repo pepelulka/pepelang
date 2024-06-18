@@ -1,0 +1,91 @@
+import math;
+
+type Vec2 = (float, float);
+type Vec3 = (float, float, float);
+
+let vec.vec2From1 x =
+    (x, x);
+
+let vec.vec3From1 x =
+    (x, x, x);
+
+let vec.multConst v c =
+    match v with
+    | (x of float, y of float) -> ({* x c}, {* y c})
+    | (x of float, y of float, z of float) -> ({* x c}, {* y c}, {* z c}) $;
+
+let vec.abs v =
+    match v with
+    | (x of float, y of float) -> ({math.abs x}, {math.abs y})
+    | (x of float, y of float, z of float) -> ({math.abs x}, {math.abs y}, {math.abs z}) $;
+
+let vec.map v f =
+    match v with
+    | (x, y) -> ({f x}, {f y})
+    | (x, y, z) -> ({f x}, {f y}, {f z}) $;
+
+/*
+Operators
+*/;
+
+let __vec.apply_Pairwise oper v1 v2 = 
+    match v1 with
+    | (x1 of float, y1 of float) ->
+        match v2 with
+        | (x2 of float, y2 of float) ->
+            ({oper x1 x2}, {oper y1 y2}) $
+    | (x1 of float, y1 of float, z1 of float) ->
+        match v2 with
+        | (x2 of float, y2 of float, z2 of float) ->
+            ({oper x1 x2}, {oper y1 y2}, {oper z1 z2}) $ $;
+
+let /+/ = { __vec.apply_Pairwise \x -> \y -> {+ x y} };
+let /-/ = { __vec.apply_Pairwise \x -> \y -> {- x y} };
+let /*/ = { __vec.apply_Pairwise \x -> \y -> {* x y} };
+let /// = { __vec.apply_Pairwise \x -> \y -> {/ x y} };
+
+/*
+Shared functions
+*/;
+
+let vec.x v = 
+    match v with
+    | (_x of float, _) -> _x
+    | (_x of float, _, _) -> _x
+    | _ -> fail None $;
+
+let vec.y v =
+    match v with
+    | (_, _y of float) -> _y
+    | (_, _y of float, _) -> _y
+    | _ -> fail None $;
+
+let vec.z v = 
+    match v with
+    | (_, _, _z of float) -> _z
+    | _ -> fail None $;
+
+let vec.len v =
+    match v with
+    | (x of float, y of float) -> {math.sqrt {+ {* x x} {* y y} } }
+    | (x of float, y of float, z of float) -> {math.sqrt {+ {* x x} {* y y} {* z z} } } $;
+
+
+let vec.normalize v = 
+    match v with
+    | _ of Vec2 -> {/// v { vec.vec2From1 {vec.len v} } }
+    | _ of Vec3 -> {/// v { vec.vec3From1 {vec.len v} } } $;
+
+let vec.dot2 v1 v2 =
+    match v1 with
+    | (x1 of float, y1 of float) ->
+        match v2 with 
+        | (x2 of float, y2 of float) ->
+            {+ {* x1 x2} {* y1 y2}} $ $;
+ 
+let vec.dot3 v1 v2 =
+    match v1 with
+    | (x1 of float, y1 of float, z1 of float) ->
+        match v2 with 
+        | (x2 of float, y2 of float, z2 of float) ->
+            {+ {* x1 x2} {* y1 y2} {* z1 z2}} $ $;

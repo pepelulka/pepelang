@@ -1,40 +1,36 @@
 ﻿module AST
 
-// Types are based on their names
-
-// TODO: Literals, example: %nl -> Literal("nl")
-
 type Expression =
-    // Basic types
-    | Int of int
-    | Char of char      // TODO
-    | String of string
+    // Basic types:
     | Bool of bool
-    | Float of float    // TODO
-    | None of unit
+    | Char of char      // TODO
+    | Float of float
+    | Int of int
     | Lambda of string*Expression
     | Lazy of Expression
     | Literal of string
-
+    | None of unit
+    | String of string
     | Tuple of Expression list
     
-    | LazyWithEnv of Expression*Environment
+    | Var of string
+
+    // Language constructions:
+    | Apply of Expression*Expression list
+    | Do of Expression list
+    | Fail of Expression
     | Force of Expression
     | If of Expression*Expression*Expression
-    | Var of string
     | Operator of string
-    | Closure of string*Expression*Environment
-    | Apply of Expression*Expression list
     | Let of string*string list*Expression
-    | LetResult of string*Expression
-    | InternalFunction of Internal
     | DefineConstraint of string*Expression
-    | Fail of Expression
-
     | LetIn of Expression*Expression
-    | Do of Expression list
-
     | Import of string
+
+    | InternalFunction of Internal
+    | LazyWithEnv of Expression*Environment
+    | LetResult of string*Expression
+    | Closure of string*Expression*Environment
 
     // Type system:
     | BaseType of string
@@ -46,9 +42,9 @@ type Expression =
     | ConstraintTuple of Expression list // List of (types or typeConstraint)
     | ConstraintAnyType
 
-    // Pattern matching: (Final boss)
+    // Pattern matching:
     | MatchCandidateSingleConstraint of string*Expression // | x of <type-constr>
-    | MatchCandidateTuple of Expression list //     | ( <match-cand1>, <mc2>, <mc3>)
+    | MatchCandidateTuple of Expression list //              | ( <match-cand1>, <mc2>, <mc3>)
     | MatchCandidateWildCard //                              | _
     | MatchEntry of Expression*Expression // <Match-candidate> * <Expression-to-eval>
     | Match of Expression*(Expression list) // match <exp> with | <match-entry1> | <match-entry2> ...
@@ -81,6 +77,7 @@ let rec TypeOf exp =
 
     | _ as s -> failwith (sprintf "Can't find out type of %A" s)
 
+// Compare types
 let rec TypesEqual exp1 exp2 =
     match (exp1, exp2) with
     | (BaseType(t1), BaseType(t2)) when t1 = t2 -> true

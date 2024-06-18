@@ -64,11 +64,26 @@ let rec private _std_div_impl lst =
     | [Float(x); Float(y)] -> Float(x / y)
     | [None(); _] -> None()
     | [_; None()] -> None()
-    | _ -> List.reduce (fun x y -> _std_div_impl [x;y]) lst
+    | _ as s -> failwith (sprintf "Can't divide %A" s)
 
 let private _std_div =
     InternalFunction(
         _std_div_impl
+    )
+
+let rec private _std_mod_impl lst =
+    match lst with
+    | [] -> None()
+    | [s] -> s
+    | [Int(x); Int(y)] -> Int(x % y)
+    | [Float(x); Float(y)] -> Float(x % y)
+    | [None(); _] -> None()
+    | [_; None()] -> None()
+    | _ as s -> failwith (sprintf "Can't mod %A" s)
+
+let private _std_mod =
+    InternalFunction(
+        _std_mod_impl
     )
 
 let rec private _std_bool_oper_impl oper lst =
@@ -214,6 +229,20 @@ let private _std_to_int =
         _std_to_int_impl
     )
 
+let private _std_to_float_impl lst =
+    match lst with
+    | [String(x)] -> try Float(float(x)) with | _ -> failwith (sprintf "Failed to convert %s to float" x)
+    | [Int(x)] -> Float(float(x))
+    | [Float(x)] -> Float(x)
+    | [Bool(true)] -> Float(1)
+    | [Bool(false)] -> Float(0)
+    | _ -> None()
+
+let private _std_to_float =
+    InternalFunction(
+        _std_to_float_impl
+    )
+
 let private _std_parse_value_impl lst =
     match lst with
     | [String(x)] -> parseValue x
@@ -241,14 +270,15 @@ let STD_MODULE = Module(
         "||", _std_or;
         "&&", _std_and;
         "!", _std_not;
+        ">>", _std_composition;
 
+        "std.mod", _std_mod;
         "std.match_type", _std_match_type;
         "std.print", _std_print;
         "std.read_line", _std_read_line;
         "std.to_int", _std_to_int;
+        "std.to_float", _std_to_float;
         "std.parse", _std_parse_value;
-
-        ">>", _std_composition;
-        "id", _std_id;
+        "std.id", _std_id;
     ]
 )

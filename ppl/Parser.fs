@@ -36,10 +36,8 @@ let private oper : Parser<_> =
    many1Satisfy isOperatorChar
 
 let private pInt : Parser<_> = pint32 .>> ws |>> Int
-let private pFloat : Parser<_> =
-    pipe2 (manySatisfy (System.Char.IsDigit) .>> pstring ".") (manySatisfy (System.Char.IsDigit) .>> spaces) (
-        fun x y -> Float(float (x + "." + y))
-    )
+let private pFloat : Parser<_> = pipe2 (manySatisfy2 (fun c -> System.Char.IsDigit c || c = '-') (System.Char.IsDigit) .>> pstring ".") (manySatisfy (System.Char.IsDigit) .>> spaces) (fun x y -> Float(float (x + "." + y)))
+
 let private pString : Parser<_> = stringLiteral .>> ws |>> String
 let private pVar : Parser<_> = identifier .>> ws |>> Var
 let private pLet : Parser<_> = 
@@ -95,8 +93,8 @@ do pMatchCandidateRef := choice [
     pCandidateAny
 ]
 
-let pMatchEntry = pipe2 (pMatchCandidate .>> ws .>> pstring "->" .>> ws) (parser .>> ws) pack2 |>> MatchEntry
-let pMatch = pipe2 (pstring "match" >>. ws >>. parser .>> ws .>> pstring "with" .>> ws) (many1 (pstring "|" >>. ws >>. pMatchEntry .>> ws)) pack2 |>> Match
+let private pMatchEntry = pipe2 (pMatchCandidate .>> ws .>> pstring "->" .>> ws) (parser .>> ws) pack2 |>> MatchEntry
+let private pMatch = pipe2 (pstring "match" >>. ws >>. parser .>> ws .>> pstring "with" .>> ws) (many1 (pstring "|" >>. ws >>. pMatchEntry .>> ws) .>> pstring "$" .>> ws) pack2 |>> Match
 
 do pConstraintRef := choice [
     attempt pOrConstraint
@@ -106,13 +104,16 @@ do pConstraintRef := choice [
     pVar
 ]
 
-let pDefineConstraint : Parser<_> = pipe2 (pstring "type" >>. ws >>. identifier .>> ws .>> pstring "=" .>> ws) (pConstraint .>> ws) pack2 |>> DefineConstraint 
+let private pDefineConstraint : Parser<_> = pipe2 (pstring "type" >>. ws >>. identifier .>> ws .>> pstring "=" .>> ws) (pConstraint .>> ws) pack2 |>> DefineConstraint 
+
+let private pComment : Parser<_> = (pstring "/*" >>. manySatisfy (fun x -> x <> '/' && x <> '*') >>. pstring "*/") >>% None()
 
 do parserRef := ws >>. choice [
     attempt pFloat
     pInt
     pString
     pApply
+    attempt pComment
     pOperator
     pLambda
     pLiteral

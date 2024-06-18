@@ -1,0 +1,7 @@
+import bst;
+import iter;
+
+let a = {bst.Add -1 {bst.Add 3 {bst.Add 10 {bst.Add 5 bst.Empty}}}};
+
+{bst.InOrder \x -> {std.print x " " } a};
+{std.print %nl};

@@ -1,0 +1,11 @@
+import pic;
+
+let f pos = 
+    match pos with
+    | (x, y) -> 
+        let cntr = (0.5, 0.5) in
+        if {< {vec.len {/-/ pos cntr}} 0.00001 } then {vec.vec3From1 1.0} else
+        let dist = {/ 0.1 {vec.len {/-/ pos cntr} } } in
+        {vec.vec3From1 dist} $;
+
+{GeneratePictureFromFunction f 10 10};

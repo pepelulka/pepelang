@@ -1,0 +1,31 @@
+import vec;
+import math;
+import iter;
+
+let Color = Vec3;
+
+let _PrintColor c = 
+    if {! {std.match_type c Color} } then fail "_PrintColor: expected color" else
+    let _rgb = {vec.map c \x -> {std.to_int {* x 255.0} } } in
+    {vec.map _rgb \x -> {std.print x " " }};
+
+/*
+Function from pos to color, e.g.:
+let g pos =
+    match pos with
+    | (x, y) -> (0.5, y, 0.5 ) $;
+*/;
+
+let _ProcessPixel f w h pixelNum =
+    let pixel_u = {std.mod pixelNum w} in
+    let pixel_v = {/ pixelNum h} in
+    let pos = ({/ { std.to_float pixel_u } { std.to_float w } }, 
+               {/ { std.to_float pixel_v } { std.to_float h } }) in
+    let _ = {_PrintColor {f pos} } in
+    if {= pixel_u {- w 1} } then {std.print %nl} else None;
+
+let GeneratePictureFromFunction f height width =
+    do [
+        {std.print "P3" %nl width " " height %nl 255 %nl};
+        {for { _ProcessPixel f width height } 0 {* height width} };
+    ];

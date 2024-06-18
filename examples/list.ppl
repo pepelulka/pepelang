@@ -1,0 +1,33 @@
+type List = (_, _);
+
+let list.Head lst =
+    match lst with
+    | (h, _) -> h
+    | n of none -> None
+    | _ -> fail "list.Head: expected list" $;
+
+let list.Tail lst =
+    match lst with
+    | (_, t) -> h
+    | n of none -> n
+    | _ -> fail "list.Tail: expected list" $;
+
+let list.IsEmpty lst =
+    match lst with
+    | (_, _) -> false
+    | n of none -> true
+    | _ -> fail "list.IsEmpty: expected list" $;
+
+let list.Map f lst =
+    match lst with
+    | n of none -> None
+    | (h, t) -> ({f h}, {list.Map f t})
+    | s -> fail "list.Map: expected list" $;
+
+let list.Add el lst =
+    match lst with
+    | n of none -> (el, None)
+    | (h, t) -> (h, { list.Add el t } )
+    | s -> fail "list.Add: expected s" $;
+
+let list.Empty = None;

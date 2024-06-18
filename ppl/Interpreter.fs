@@ -1,7 +1,11 @@
 ﻿module Interpreter
 
+open System
+open System.IO
+
 open AST
 open Utils 
+open FParsec
 
 // Double environment ============================================================ Functions for double environment:
 // first - dynamic environment, second - static
@@ -173,20 +177,26 @@ and checkEntry exp entry env : Expression option = // Checks if entry is satisfi
     | _ -> failwith "Internal logic error"
         
         
-let EvalList (lst:Expression list) (env:DoubleEnvironment) (modules:ModuleSet) : Environment =
+let rec EvalList (lst:Expression list) (env:DoubleEnvironment) (modules:ModuleSet) (filename:string) : DoubleEnvironment =
     let folder en ex =
         let evalEx = (Evaluate ex en) in
-        // printfn "Expression // ==================="; // Debug
-        // printfn "%A" evalEx;                         // Debug
         match evalEx with
         | LetResult(x, y) -> Set x y en
-        | Import(x) -> try Import (Map.find x modules) env with _ -> failwith (sprintf "Can't find module %s" x) 
+        | Import(x) -> try Import (Map.find x modules) en
+                            with _ -> let fname = (Path.GetDirectoryName filename) + "\\" + x + ".ppl" in try let newEnv = (RunProgramFromFile fname modules ) 
+                                                                                                               in (Merge (Dynamic newEnv) (Import (Static newEnv) en) )
+                                                                                                                with _ -> failwith (sprintf "Can't run program from %s" fname)
+                                                                        
         | DefineConstraint(name, c) -> Set name c en
         | _ -> en
     in
-    Dynamic (List.fold folder env lst)
-
-// Final:
-let RunProgram (program:Program) (modules:ModuleSet) : Environment =
+    List.fold folder env lst
+and RunProgram (program:Program) (modules:ModuleSet) (filename:string) : DoubleEnvironment =
     let startEnv = DoubleEnvironment(Map.empty, Map.empty)
-    EvalList program (Import StdModule.STD_MODULE startEnv) modules
+    EvalList program (Import StdModule.STD_MODULE startEnv) modules filename
+and RunProgramFromFile (filename:string) (modules:ModuleSet) : DoubleEnvironment =
+    let fileContent =
+        File.ReadAllText filename
+    match (run Parser.FinalParser fileContent) with
+    | Failure(x, _, _) -> failwith (sprintf "%s" x)
+    | Success(x, _, _) -> (RunProgram x modules filename)

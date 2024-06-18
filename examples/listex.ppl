@@ -1,0 +1,18 @@
+import list;
+import iter;
+
+let a = { 
+          iter.iter 
+            list.Empty 
+            \x -> \y ->
+                {list.Add y x}
+            0
+            10
+        }; 
+
+let b = {list.Map \x -> {* x x} a};
+
+let printList lst = do [{list.Map \x -> {std.print x " "} lst};
+                        {std.print %nl};];
+
+{printList b};
