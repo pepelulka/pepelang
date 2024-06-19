@@ -1,0 +1,20 @@
+import lens;
+import iter;
+
+let a = { 
+          iter.iter 
+            list.Empty 
+            \x -> \y ->
+                {list.Add y x}
+            0
+            10
+        }; 
+
+let v1 = {list.Add "12" {list.Add "11" {list.Empty}}};
+let v2 = {list.Add "22" {list.Add "21" {list.Empty}}};
+
+let m = {list.Add v2 {list.Add v1 {list.Empty}}};
+
+let get22 = {>> {lens.list.nth 1} {lens.list.nth 1}};
+
+{std.print {get22 m} %nl };

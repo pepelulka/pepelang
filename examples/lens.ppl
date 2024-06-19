@@ -1,0 +1,9 @@
+import list;
+
+let lens.list.nth n lst =
+    match lst with
+    | n of none -> fail "out of range"
+    | (h, t) -> 
+        if {= n 0} then h else
+        {lens.list.nth {- n 1} t}
+    | _ -> fail "lens.list.nth: expected list" $;

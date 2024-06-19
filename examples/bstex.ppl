@@ -5,3 +5,4 @@ let a = {bst.Add -1 {bst.Add 3 {bst.Add 10 {bst.Add 5 bst.Empty}}}};
 
 {bst.InOrder \x -> {std.print x " " } a};
 {std.print %nl};
+{std.print {bst.Find 3 a} " " {bst.Find 12 a} %nl};

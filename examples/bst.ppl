@@ -8,6 +8,15 @@ let bst.Add el bst =
         else ({bst.Add el lc}, rt, rc)
     | _ -> fail "bst.Add: expected bst" $;
 
+let bst.Find el bst =
+    match bst with
+    | n of none -> false
+    | (lc, rt, rc) ->
+        if {= rt el} then true else
+        if {< el rt} then {bst.Find el lc} else
+        {bst.Find el rc}
+    | _ -> fail "bst.Find: expected bst" $;
+
 let bst.InOrder f bst =
     match bst with
     | n of none -> None
